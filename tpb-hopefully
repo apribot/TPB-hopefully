@@ -1,0 +1,34 @@
+#!/usr/bin/env php
+<?php
+ini_set('default_socket_timeout', 5);
+
+if(!isset($argv[1])) {
+	die('no search provided');
+}
+
+$search = urlencode($argv[1]);
+$done = false;
+
+while(!$done) {
+	echo "trying\n";
+	$content = @file_get_contents("https://thepiratebay.org/search/${search}/0/99/0");
+	if($content === false) {
+		echo "nope\n";
+		sleep(60);
+	} else {
+		echo "got it!\n";
+
+		preg_match_all('/magnet:\?[^"]+/', $content, $mags);
+		preg_match_all('/detName">[^>]+>([^<]+)/', $content, $names);
+		
+		echo "\n-----------------------------\n";
+		
+		foreach ($mags[0] as $key => $value) {
+			echo "> " . $names[1][$key] . "\n\n";
+			echo trim($value);
+			echo "\n-----------------------------\n";
+		}
+
+		$done = true;
+	}
+}
